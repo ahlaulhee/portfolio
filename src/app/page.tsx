@@ -1,113 +1,195 @@
-import Image from 'next/image'
+"use client";
+import React, { useEffect, useRef } from "react";
+import "./globals.css";
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+  const welcome = `
+               Welcome to my Portfolio
+             _     _             _ _          
+        __ _| |__ | | __ _ _   _| | |__   ___ 
+       / _\` | '_ \\| |/ _\` | | | | | '_ \\ / _ \\
+      | (_| | | | | | (_| | |_| | | | | |  __/
+       \\__,_|_| |_|_|\\__,_|\\__,_|_|_| |_|\\___|
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡠⠔⠒⠉⠉⠉⠉⠉⠉⠁⠒⠦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡠⠚⠁⠀⢄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢢⡀⠀⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡰⠋⠀⠀⣀⡤⠠⡄⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⠀⠘⢦⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⡜⠁⠀⠀⣼⣬⣥⣴⣶⣶⣾⣷⣶⣦⣤⣄⡂⠀⣀⠐⠀⠀⠀⢣⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⣸⠥⠒⠊⠉⠁⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠻⠿⣷⣦⡀⠀⠀⠀⠀⣇⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⣠⠖⡩⠀⠀⠀⠀⠀⣀⣤⣴⣶⠚⣷⣶⣶⣤⣄⡀⠀⠀⠀⠙⠻⣦⡄⠀⠀⢸⠀⠀⠀⠀
+  ⠀⠀⢀⠴⠋⡤⠊⠀⠀⠀⣠⣴⣿⣿⠛⣿⡟⠀⠈⢿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠙⢦⡀⠸⠀⠀⠀⠀
+  ⠀⡴⠁⠀⠀⠀⠀⠀⢀⣼⣿⣿⣿⠇⠀⣿⠃⠀⠀⠈⣿⣿⠏⢿⣿⣿⣿⣦⡠⣀⠄⠀⠙⢇⠀⠀⠀⠀
+  ⡼⠀⠀⠀⢀⡄⠀⢀⣾⣿⣿⣿⡏⠀⠀⣿⠀⠀⢠⡀⢸⡿⠀⠈⢿⣿⣿⣿⣷⡌⠢⡀⠀⠀⠑⡄⠀⠀
+  ⣇⠀⠀⠀⣈⠃⠀⢸⣿⣿⡟⣿⠀⠀⠀⠸⠀⠀⠈⠁⢨⠇⠀⣠⠼⣿⣿⣿⣿⣿⡄⠡⡄⠀⠀⠈⢆⠀
+  ⠘⣆⠀⠱⡙⠄⢃⡿⣿⣿⡇⢻⢢⠽⠷⠿⡀⠀⠀⠀⠋⢉⠟⠉⠙⢿⢸⣿⣿⣿⣿⠀⡄⣀⠀⠀⠀⣇
+  ⠀⠈⢦⡐⠞⠔⠊⢁⡿⣿⡇⠈⠋⢰⣶⠀⠙⢆⠀⠀⠀⠈⠀⢾⠆⠈⡹⢹⣿⣿⣿⡇⠁⠉⠀⠀⠀⢸
+  ⠀⠀⠀⠙⠢⡐⠙⠋⠀⢻⡿⡄⠠⢄⣀⡠⠊⡸⠀⠀⠀⠐⠦⣄⠤⠞⠀⢼⣿⢏⣿⡟⠰⢿⠆⠀⠀⡸
+  ⠀⠀⠀⠀⠀⠈⠉⠳⢄⡈⢿⢷⠀⠀⠀⠀⠀⠙⠂⠀⠀⠀⣀⠀⠀⠀⠀⣜⣹⣾⠟⢳⢀⠀⠀⢀⡸⠃
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠻⡄⠀⢈⠵⠒⢲⢞⡋⠉⠛⢦⡀⠈⢃⡼⠟⣛⣁⣀⡠⠵⠛⠈⠁⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠦⣀⠀⠀⠃⠀⠓⠀⠀⠀⣈⡴⠋⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠒⡖⠠⠔⠒⠒⢉⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣷⠀⠀⠀⠀⠈⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⡉⠏⠀⠀⠀⠀⠀⢹⣿⣶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⣾⣿⣿⣿⣿⡖⠢⢄⡠⠔⢲⣾⣿⣿⣿⣿⠲⣄⠀⠀⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡜⠁⢸⣿⣿⣿⣿⣿⣆⠀⠀⣰⣿⣿⣿⣿⣿⣿⠀⠈⢣⠀⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⡸⠀⠀⢸⣿⣿⣿⣿⣿⣿⣆⣼⣿⣿⣿⣿⣿⣿⣿⠀⠓⠈⡇⠀⠀⠀⠀⠀⠀
+  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀
+      Type 'help' to see the available commands
+`;
+  const [input, setInput] = React.useState("");
+  const [output, setOutput] = React.useState(welcome);
+  const [prefix, setPrefix] = React.useState("visitor");
+  const [afterfix, setAfterfix] = React.useState("@ahlaulhee.github.io:~$");
+  const [history, setHistory] = React.useState<Array<string>>([]);
+  const categories = [
+    { command: "about", desc: "Simple description about me." },
+    { command: "projects", desc: "Projects i've worked on." },
+    { command: "futureprojects", desc: "Projects i'm planning to do." },
+    { command: "contact", desc: "Socials in which you can find me." },
+    { command: "hobbies", desc: "My current hobbies apart from programming." },
+    { command: "help", desc: "The whole list of commands and it's use." },
+    {
+      command: "history",
+      desc: "All the commands you did in the current session.",
+    },
+    { command: "whoami", desc: "Who am I?." },
+    { command: "pwd", desc: "Print working directory." },
+    {
+      command: "setprefix [value]",
+      desc: "Change your prefix to something more creative.",
+    },
+    { command: "clear", desc: "Clear all the commands on screen." },
+    { command: "", desc: "" },
+    { command: "PRESS CTRL + L", desc: "CLEAR THE TERMINAL" },
+    { command: "PRESS ARROW UP", desc: "SEE PREVIOUS COMMAND" },
+  ];
+  const about = `Hi there! I'm a Technical Programmer with a degree in Computer Science. I love working with a variety of programming languages, primarily TypeScript.`;
+  const projects = `I'm currently working on this portfolio, but these are some of my latest projects:
+PaSSafe : An App for IOS/ANDROID to generate and store passwords safely (Developed using MERN stack).
+wttg2-helper : A website to help begginer players to complete the game Welcome to the Game 2.
+Portfolio : What you see!.`;
+  const futureProjects = `atm i dont have anything in mind.`;
+  const contact = `My socials are the next:
+~ Github : https://github.com/ahlaulhee
+~ Linkedin : https://www.linkedin.com/in/alex-laulhe/
+~ Instagram : https://www.instagram.com/alex.laulhe/
+~ Gmail : ahlaulhe@gmail.com`;
+  const hobbies = `Apart from coding, I enjoy gamming, some of my favorite games are Welcome to the Game 2, Minecraft, Counter Strike: Global Offensive and Dead by Daylight.`;
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+  const handleOutput = (info: string) => {
+    setOutput((prev) => `${(prev += `$ ${input} \n${info} \n`)}`);
+    setInput("");
+  };
+
+  const handleInput = (e: any) => {
+    setInput(e.target.value);
+  };
+  const validateInput = (input: string) => {
+    let output: string;
+    let regex = /^setprefix\s\S+$/;
+    if (regex.test(input)) {
+      const auxArray = input.split(" ");
+      setPrefix(auxArray[1]);
+      setOutput((prev) => `${prev}$ ${input}\n`);
+      setInput("");
+    } else {
+      switch (input) {
+        case "help": {
+          handleOutput(
+            categories
+              .map(
+                (e) =>
+                  `${e.command} ${" ".repeat(25 - e.command.length)} ${e.desc}`
+              )
+              .join("\n")
+          );
+          break;
+        }
+        case "welcome": {
+          handleOutput(welcome);
+          break;
+        }
+        case "about": {
+          handleOutput(about);
+          break;
+        }
+        case "projects": {
+          handleOutput(projects);
+          break;
+        }
+        case "futureprojects": {
+          handleOutput(futureProjects);
+          break;
+        }
+        case "contact": {
+          handleOutput(contact);
+          break;
+        }
+        case "hobbies": {
+          handleOutput(hobbies);
+          break;
+        }
+        case "history": {
+          handleOutput(history.join("\n"));
+          break;
+        }
+        case "whoami": {
+          handleOutput(prefix);
+          break;
+        }
+        case "pwd": {
+          handleOutput(`${prefix}/home`);
+          break;
+        }
+        case "clear": {
+          setOutput("");
+          setInput("");
+          break;
+        }
+        default: {
+          handleOutput(`command not found: ${input}`);
+          break;
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    document.getElementById("consoleInput")?.focus();
+    window.scrollTo(0, document.body.scrollHeight);
+  }, [output]);
+
+  return (
+    <main
+      onClick={(e) => document.getElementById("consoleInput")?.focus()}
+      className="bg-darkBlue text-white w-auto h-screen flex-col items-start font-primary p-5"
+    >
+      <pre className="bg-darkBlue text-mediumBlue">{output}</pre>
+      <div className="flex py-1">
+        <span className="bg-darkBlue pr-2">
+          <span className="text-red">{prefix}</span>
+          <span className="text-green">{afterfix}</span>
+        </span>
+        <input
+          type="text"
+          id="consoleInput"
+          onChange={handleInput}
+          onKeyDown={(key) => {
+            if (key.key === "Enter") {
+              history.push(input);
+              validateInput(input);
+            }
+            if (key.key === "ArrowUp") {
+              let aux = history.pop();
+              aux ? setInput(aux?.toString()) : null;
+            }
+            if (key.ctrlKey && key.key === "l") {
+              setOutput("");
+            }
+          }}
+          value={input}
+          className="bg-darkBlue border-0 p-0 w-full focus:outline-none placeholder-gray-500"
         />
       </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
     </main>
-  )
+  );
 }
