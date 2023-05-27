@@ -1,162 +1,161 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import "./globals.css";
+import { db } from "./firebase";
+import { getDocs, collection } from "firebase/firestore";
 
 export default function Home() {
-  const welcome = `
-               Welcome to my Portfolio
-             _     _             _ _          
-        __ _| |__ | | __ _ _   _| | |__   ___ 
-       / _\` | '_ \\| |/ _\` | | | | | '_ \\ / _ \\
-      | (_| | | | | | (_| | |_| | | | | |  __/
-       \\__,_|_| |_|_|\\__,_|\\__,_|_|_| |_|\\___|
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡠⠔⠒⠉⠉⠉⠉⠉⠉⠁⠒⠦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡠⠚⠁⠀⢄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢢⡀⠀⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡰⠋⠀⠀⣀⡤⠠⡄⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⠀⠘⢦⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⡜⠁⠀⠀⣼⣬⣥⣴⣶⣶⣾⣷⣶⣦⣤⣄⡂⠀⣀⠐⠀⠀⠀⢣⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⣸⠥⠒⠊⠉⠁⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠻⠿⣷⣦⡀⠀⠀⠀⠀⣇⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⣠⠖⡩⠀⠀⠀⠀⠀⣀⣤⣴⣶⠚⣷⣶⣶⣤⣄⡀⠀⠀⠀⠙⠻⣦⡄⠀⠀⢸⠀⠀⠀⠀
-  ⠀⠀⢀⠴⠋⡤⠊⠀⠀⠀⣠⣴⣿⣿⠛⣿⡟⠀⠈⢿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠙⢦⡀⠸⠀⠀⠀⠀
-  ⠀⡴⠁⠀⠀⠀⠀⠀⢀⣼⣿⣿⣿⠇⠀⣿⠃⠀⠀⠈⣿⣿⠏⢿⣿⣿⣿⣦⡠⣀⠄⠀⠙⢇⠀⠀⠀⠀
-  ⡼⠀⠀⠀⢀⡄⠀⢀⣾⣿⣿⣿⡏⠀⠀⣿⠀⠀⢠⡀⢸⡿⠀⠈⢿⣿⣿⣿⣷⡌⠢⡀⠀⠀⠑⡄⠀⠀
-  ⣇⠀⠀⠀⣈⠃⠀⢸⣿⣿⡟⣿⠀⠀⠀⠸⠀⠀⠈⠁⢨⠇⠀⣠⠼⣿⣿⣿⣿⣿⡄⠡⡄⠀⠀⠈⢆⠀
-  ⠘⣆⠀⠱⡙⠄⢃⡿⣿⣿⡇⢻⢢⠽⠷⠿⡀⠀⠀⠀⠋⢉⠟⠉⠙⢿⢸⣿⣿⣿⣿⠀⡄⣀⠀⠀⠀⣇
-  ⠀⠈⢦⡐⠞⠔⠊⢁⡿⣿⡇⠈⠋⢰⣶⠀⠙⢆⠀⠀⠀⠈⠀⢾⠆⠈⡹⢹⣿⣿⣿⡇⠁⠉⠀⠀⠀⢸
-  ⠀⠀⠀⠙⠢⡐⠙⠋⠀⢻⡿⡄⠠⢄⣀⡠⠊⡸⠀⠀⠀⠐⠦⣄⠤⠞⠀⢼⣿⢏⣿⡟⠰⢿⠆⠀⠀⡸
-  ⠀⠀⠀⠀⠀⠈⠉⠳⢄⡈⢿⢷⠀⠀⠀⠀⠀⠙⠂⠀⠀⠀⣀⠀⠀⠀⠀⣜⣹⣾⠟⢳⢀⠀⠀⢀⡸⠃
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠻⡄⠀⢈⠵⠒⢲⢞⡋⠉⠛⢦⡀⠈⢃⡼⠟⣛⣁⣀⡠⠵⠛⠈⠁⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠦⣀⠀⠀⠃⠀⠓⠀⠀⠀⣈⡴⠋⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠒⡖⠠⠔⠒⠒⢉⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣷⠀⠀⠀⠀⠈⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⡉⠏⠀⠀⠀⠀⠀⢹⣿⣶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⣾⣿⣿⣿⣿⡖⠢⢄⡠⠔⢲⣾⣿⣿⣿⣿⠲⣄⠀⠀⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡜⠁⢸⣿⣿⣿⣿⣿⣆⠀⠀⣰⣿⣿⣿⣿⣿⣿⠀⠈⢣⠀⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⡸⠀⠀⢸⣿⣿⣿⣿⣿⣿⣆⣼⣿⣿⣿⣿⣿⣿⣿⠀⠓⠈⡇⠀⠀⠀⠀⠀⠀
-  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀
-      Type 'help' to see the available commands
-`;
-  const [input, setInput] = React.useState("");
-  const [output, setOutput] = React.useState(welcome);
-  const [prefix, setPrefix] = React.useState("visitor");
-  const [afterfix, setAfterfix] = React.useState("@ahlaulhee.github.io:~$");
+  interface Category {
+    id: string;
+    name: string;
+    info: string;
+    desc: string;
+  }
+
+  const [category, setCategory] = React.useState<Category[]>([]);
+  const [input, setInput] = React.useState<string>("");
+  const [output, setOutput] = React.useState<string>("");
+  const [prefix, setPrefix] = React.useState<string>("visitor");
   const [history, setHistory] = React.useState<Array<string>>([]);
-  const categories = [
-    { command: "about", desc: "Simple description about me." },
-    { command: "projects", desc: "Projects i've worked on." },
-    { command: "futureprojects", desc: "Projects i'm planning to do." },
-    { command: "contact", desc: "Socials in which you can find me." },
-    { command: "hobbies", desc: "My current hobbies apart from programming." },
-    { command: "help", desc: "The whole list of commands and it's use." },
-    {
-      command: "history",
-      desc: "All the commands you did in the current session.",
-    },
-    { command: "whoami", desc: "Who am I?." },
-    { command: "pwd", desc: "Print working directory." },
-    {
-      command: "setprefix [value]",
-      desc: "Change your prefix to something more creative.",
-    },
-    { command: "clear", desc: "Clear all the commands on screen." },
-    { command: "", desc: "" },
-    { command: "PRESS CTRL + L", desc: "CLEAR THE TERMINAL" },
-    { command: "PRESS ARROW UP", desc: "SEE PREVIOUS COMMAND" },
-  ];
-  const about = `Hi there! I'm a Technical Programmer with a degree in Computer Science. I love working with a variety of programming languages, primarily TypeScript.`;
-  const projects = `I'm currently working on this portfolio, but these are some of my latest projects:
-PaSSafe : An App for IOS/ANDROID to generate and store passwords safely (Developed using MERN stack).
-wttg2-helper : A website to help begginer players to complete the game Welcome to the Game 2.
-Portfolio : What you see!.`;
-  const futureProjects = `atm i dont have anything in mind.`;
-  const contact = `My socials are the next:
-~ Github : https://github.com/ahlaulhee
-~ Linkedin : https://www.linkedin.com/in/alex-laulhe/
-~ Instagram : https://www.instagram.com/alex.laulhe/
-~ Gmail : ahlaulhe@gmail.com`;
-  const hobbies = `Apart from coding, I enjoy gamming, some of my favorite games are Welcome to the Game 2, Minecraft, Counter Strike: Global Offensive and Dead by Daylight.`;
+  const [historyIndex, setHistoryIndex] = React.useState<number>(-1);
+
+  const afterfix = "@ahlaulhee.github.io:~$";
+  const categoryCollectionRef = collection(db, "categories");
+  useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const data = await getDocs(categoryCollectionRef);
+        const filteredData = data.docs.map((doc) => ({
+          // ...doc.data(),
+          id: doc.id,
+          name: doc.data().name,
+          info: doc.data().info,
+          desc: doc.data().desc,
+        }));
+        setCategory(filteredData.sort((a, b) => a.name.localeCompare(b.name)));
+        const welcome = filteredData.find((c) => c.name === "welcome");
+        if (welcome) {
+          setOutput(`${welcome.info.split("\\n").join("\n")} \n`);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    document.getElementById("consoleInput")?.focus();
+    window.scrollTo(0, document.body.scrollHeight);
+  }, [output]);
 
   const handleOutput = (info: string) => {
-    setOutput((prev) => `${(prev += `$ ${input} \n${info} \n`)}`);
+    setOutput(
+      (prev) => `${(prev += `$ ${input} \n${info.split("\\n").join("\n")} \n`)}`
+    );
     setInput("");
   };
 
   const handleInput = (e: any) => {
     setInput(e.target.value);
   };
-  const validateInput = (input: string) => {
-    let output: string;
-    let regex = /^setprefix\s\S+$/;
-    if (regex.test(input)) {
+
+  type CommandHandlers = Record<string, () => void>;
+
+  const commandHandlers: CommandHandlers = {
+    setprefix: () => {
       const auxArray = input.split(" ");
       setPrefix(auxArray[1]);
       setOutput((prev) => `${prev}$ ${input}\n`);
       setInput("");
+    },
+    help: () => {
+      handleOutput(
+        category
+          .map((e) => `${e.name} ${" ".repeat(25 - e.name.length)} ${e.desc}`)
+          .join("\n")
+      );
+    },
+    welcome: () => {
+      const welcome: Category | undefined = category.find(
+        (c) => c.name === "welcome"
+      );
+      if (welcome) {
+        handleOutput(welcome.info);
+      }
+    },
+    about: () => {
+      const about = category.find((c) => c.name === "about");
+      if (about) {
+        handleOutput(about.info);
+      }
+    },
+    projects: () => {
+      const projects = category.find((c) => c.name === "projects");
+      if (projects) {
+        handleOutput(projects.info);
+      }
+    },
+    futureprojects: () => {
+      const futureprojects = category.find((c) => c.name === "futureprojects");
+      if (futureprojects) {
+        handleOutput(futureprojects.info);
+      }
+    },
+    contact: () => {
+      const contact = category.find((c) => c.name === "contact");
+      if (contact) {
+        handleOutput(contact.info);
+      }
+    },
+    hobbies: () => {
+      const hobbies = category.find((c) => c.name === "hobbies");
+      if (hobbies) {
+        handleOutput(hobbies.info);
+      }
+    },
+    education: () => {
+      const education = category.find((c) => c.name === "education");
+      if (education) {
+        handleOutput(education.info);
+      }
+    },
+    jobs: () => {
+      const jobs = category.find((c) => c.name === "jobs");
+      if (jobs) {
+        handleOutput(jobs.info);
+      }
+    },
+    skills: () => {
+      const skills = category.find((c) => c.name === "skills");
+      if (skills) {
+        handleOutput(skills.info);
+      }
+    },
+
+    history: () => handleOutput(history.join("\n")),
+    whoami: () => handleOutput(prefix),
+    pwd: () => handleOutput(`${prefix}/home`),
+    clear: () => {
+      setOutput("");
+      setInput("");
+    },
+  };
+
+  const validateInput = (input: string) => {
+    let regex = /^setprefix\s\S+$/;
+    if (regex.test(input)) {
+      commandHandlers.setprefix();
     } else {
-      switch (input) {
-        case "help": {
-          handleOutput(
-            categories
-              .map(
-                (e) =>
-                  `${e.command} ${" ".repeat(25 - e.command.length)} ${e.desc}`
-              )
-              .join("\n")
-          );
-          break;
-        }
-        case "welcome": {
-          handleOutput(welcome);
-          break;
-        }
-        case "about": {
-          handleOutput(about);
-          break;
-        }
-        case "projects": {
-          handleOutput(projects);
-          break;
-        }
-        case "futureprojects": {
-          handleOutput(futureProjects);
-          break;
-        }
-        case "contact": {
-          handleOutput(contact);
-          break;
-        }
-        case "hobbies": {
-          handleOutput(hobbies);
-          break;
-        }
-        case "history": {
-          handleOutput(history.join("\n"));
-          break;
-        }
-        case "whoami": {
-          handleOutput(prefix);
-          break;
-        }
-        case "pwd": {
-          handleOutput(`${prefix}/home`);
-          break;
-        }
-        case "clear": {
-          setOutput("");
-          setInput("");
-          break;
-        }
-        default: {
-          handleOutput(`command not found: ${input}`);
-          break;
-        }
+      const commandHandler = commandHandlers[input];
+      if (commandHandler) {
+        commandHandler();
+      } else {
+        handleOutput(`command not found: ${input}`);
       }
     }
   };
-
-  useEffect(() => {
-    document.getElementById("consoleInput")?.focus();
-    window.scrollTo(0, document.body.scrollHeight);
-  }, [output]);
 
   return (
     <main
@@ -172,21 +171,31 @@ Portfolio : What you see!.`;
         <input
           type="text"
           id="consoleInput"
+          value={input}
           onChange={handleInput}
-          onKeyDown={(key) => {
-            if (key.key === "Enter") {
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
               history.push(input);
               validateInput(input);
+              setHistoryIndex(history.length);
+            } else if (e.key === "ArrowUp") {
+              if (historyIndex > 0) {
+                setHistoryIndex(historyIndex - 1);
+                setInput(history[historyIndex - 1]);
+              }
+            } else if (e.key === "ArrowDown") {
+              if (historyIndex < history.length - 1) {
+                setHistoryIndex(historyIndex + 1);
+                setInput(history[historyIndex + 1]);
+              } else {
+                setHistoryIndex(history.length);
+                setInput("");
+              }
             }
-            if (key.key === "ArrowUp") {
-              let aux = history.pop();
-              aux ? setInput(aux?.toString()) : null;
-            }
-            if (key.ctrlKey && key.key === "l") {
+            if (e.ctrlKey && e.key === "l") {
               setOutput("");
             }
           }}
-          value={input}
           className="bg-darkBlue border-0 p-0 w-full focus:outline-none placeholder-gray-500"
         />
       </div>
