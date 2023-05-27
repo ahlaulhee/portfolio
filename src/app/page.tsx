@@ -3,15 +3,14 @@ import React, { useEffect, useRef } from "react";
 import "./globals.css";
 import { db } from "./firebase";
 import { getDocs, collection } from "firebase/firestore";
+interface Category {
+  id: string;
+  name: string;
+  info: string;
+  desc: string;
+}
 
 export default function Home() {
-  interface Category {
-    id: string;
-    name: string;
-    info: string;
-    desc: string;
-  }
-
   const [category, setCategory] = React.useState<Category[]>([]);
   const [input, setInput] = React.useState<string>("");
   const [output, setOutput] = React.useState<string>("");
@@ -21,6 +20,8 @@ export default function Home() {
 
   const afterfix = "@ahlaulhee.github.io:~$";
   const categoryCollectionRef = collection(db, "categories");
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     const getCategories = async () => {
       try {
@@ -57,7 +58,7 @@ export default function Home() {
     setInput("");
   };
 
-  const handleInput = (e: any) => {
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
 
@@ -159,7 +160,7 @@ export default function Home() {
 
   return (
     <main
-      onClick={(e) => document.getElementById("consoleInput")?.focus()}
+      onClick={(e) => inputRef.current?.focus()}
       className="bg-darkBlue text-white w-auto h-screen flex-col items-start font-primary p-5"
     >
       <pre className="bg-darkBlue text-mediumBlue">{output}</pre>
@@ -169,11 +170,12 @@ export default function Home() {
           <span className="text-green">{afterfix}</span>
         </span>
         <input
+          ref={inputRef}
           type="text"
           id="consoleInput"
           value={input}
           onChange={handleInput}
-          onKeyDown={(e) => {
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === "Enter") {
               history.push(input);
               validateInput(input);
