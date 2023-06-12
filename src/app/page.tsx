@@ -7,7 +7,10 @@ import { commandHandlers, CommandHandlers } from "./commandHandlers";
 export default function Home() {
   const [category, setCategory] = React.useState<Category[]>([]);
   const [input, setInput] = React.useState<string>("");
-  const [output, setOutput] = React.useState<string>("");
+  // const [output, setOutput] = React.useState<string>("");
+  const [output, setOutput] = React.useState<
+    Array<{ text: string; color?: string }>
+  >([]);
   const [prefix, setPrefix] = React.useState<string>("visitor");
   const [history, setHistory] = React.useState<Array<string>>([]);
   const [historyIndex, setHistoryIndex] = React.useState<number>(-1);
@@ -21,7 +24,9 @@ export default function Home() {
       setCategory(categories);
       const welcome = categories.find((c) => c.name === "welcome");
       if (welcome) {
-        setOutput(`${welcome.info.split("\\n").join("\n")} \n`);
+        // setOutput(`${welcome.info.split("\\n").join("\n")} \n`);
+        // setOutput(`${welcome.info.split("\\n").join("\n")} \n`);
+        setOutput([{ text: `${welcome.info.split("\\n").join("\n")} \n` }]);
       }
     };
     fetchCategories();
@@ -33,10 +38,15 @@ export default function Home() {
     window.scrollTo(0, document.body.scrollHeight);
   }, [output]);
 
-  const handleOutput = (info: string) => {
-    setOutput(
-      (prev) => `${(prev += `$ ${input} \n${info.split("\\n").join("\n")} \n`)}`
-    );
+  const handleOutput = (info: string, color: string = "#9aa5ce") => {
+    // setOutput(
+    //   (prev) => `${(prev += `$ ${input} \n${info.split("\\n").join("\n")} \n`)}`
+    // );
+    // setInput("");
+    setOutput((prev) => [
+      ...prev,
+      { text: `$ ${input} \n${info.split("\\n").join("\n")} \n`, color },
+    ]);
     setInput("");
   };
 
@@ -49,7 +59,8 @@ export default function Home() {
     if (regex.test(input)) {
       commandHandlers.setprefix(category, input, (newPrefix) => {
         setPrefix(newPrefix);
-        setOutput((prev) => `${prev}$ ${input}\n`);
+        // setOutput((prev) => `${prev}$ ${input}\n`);
+        handleOutput(`${input}`);
         setInput("");
       });
     } else {
@@ -60,20 +71,25 @@ export default function Home() {
         input === "pwd" ||
         input === "clear" ||
         input === "history" ||
-        input === "whoami"
+        input === "whoami" ||
+        input === "date"
       ) {
         switch (input) {
-          case "history":
-            handleOutput(history.join("\n"));
-            break;
           case "pwd":
             handleOutput(`${prefix}/home`);
+            break;
+          case "history":
+            handleOutput(`${history.join("\\n")}`);
             break;
           case "whoami":
             handleOutput(prefix);
             break;
+          case "date":
+            const today = new Date();
+            handleOutput(`${today.toLocaleDateString("en-US")}`);
+            break;
           case "clear":
-            setOutput("");
+            setOutput([]);
             setInput("");
             break;
           default:
@@ -90,7 +106,15 @@ export default function Home() {
       onClick={(e) => inputRef.current?.focus()}
       className="bg-darkBlue text-white w-auto h-screen flex-col items-start font-primary p-5"
     >
-      <pre className="bg-darkBlue text-mediumBlue">{output}</pre>
+      {/* <pre className="bg-darkBlue text-mediumBlue">{output}</pre> */}
+      <pre className="bg-darkBlue text-mediumBlue">
+        {output.map((item, index) => (
+          <span key={index} style={{ color: item.color || "inherit" }}>
+            {item.text}
+          </span>
+        ))}
+      </pre>
+
       <div className="flex py-1">
         <span className="bg-darkBlue pr-2">
           <span className="text-red">{prefix}</span>
@@ -122,7 +146,7 @@ export default function Home() {
               }
             }
             if (e.ctrlKey && e.key === "l") {
-              setOutput("");
+              setOutput([]);
             }
           }}
           className="bg-darkBlue border-0 p-0 w-full focus:outline-none placeholder-gray-500"
